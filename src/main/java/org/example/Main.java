@@ -1,18 +1,24 @@
 package org.example;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 public class Main {
-    public static final int START_VAL = 1;
     public static final int MAX_VAl = 3;
 
     public static void main(String[] args) throws Exception {
         Shop account = new Shop();
 
-        for (int i = START_VAL; i <= MAX_VAl; i++){
-            Thread thread = new Thread(null, account::transferCash, "Магазин " + i);
-            thread.start();
-            thread.join();
+        ExecutorService es = Executors.newCachedThreadPool();
+        for (int i = 0; i < MAX_VAl; i++) {
+            es.execute(account::transferCash);
         }
-        account.calculate();
+        es.shutdown();
+        boolean isOver = es.awaitTermination(1, TimeUnit.MINUTES);
 
+        if (isOver) {
+            account.calculate();
+        }
     }
 }
